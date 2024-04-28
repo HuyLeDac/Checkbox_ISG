@@ -6,9 +6,12 @@ After that, you can chose on what application to run:
 
 Run Edge Applicataion:
 `flutter run -d edge`
+
 Run Chrome Application: 
 `flutter run -d chrome`
+
 Run Windows application:
 `flutter run -d windows`
+
 Run on Linux:
 `flutter run -d linux`
