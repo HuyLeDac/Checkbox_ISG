@@ -55,6 +55,47 @@ class _TodoAppState extends State<TodoApp> {
     });
   }
 
+  //Build the add todo button
+  Padding buildAddTodoButton() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ElevatedButton(
+        onPressed: () => addTodo(controller.text),
+        child: const Tooltip(
+          message: 'Write down your todo and click here to add it to the list.',
+          child: Text('Add todo'),
+        ),
+      ),
+    );
+  }
+
+  //Build the clear todos button
+  Padding buildClearTodosButton() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ElevatedButton(
+        onPressed: () {
+          setState(() {
+            todos.clear();
+          });
+        },
+        child: const Tooltip(
+          message: 'Click here to clear the list of todos.',
+          child: Text('Clear todos'),
+        ),
+      ),
+    );
+  }
+
+  //Build the counter text
+  Padding buildCounterText(int length) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Text('Number of todos: $length'),
+    );
+  }
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,41 +122,13 @@ class _TodoAppState extends State<TodoApp> {
         
             //Row to add a new todo and clear the list of todos
             Row(
-              //Button to add a new todo
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    // When the button is pressed, addTodo function is called
-                    onPressed: () => addTodo(controller.text),
-                    child: const Tooltip(
-                      message: 'Write down your todo and click here to add it to the list.',
-                      child: Text('Add todo'),
-                    ),
-                  ),
-                ),
-        
+                //Button to add a new todo
+                buildAddTodoButton(),
                 //Button to clear the list of todos
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        todos.clear();
-                      });
-                    },
-                    child: const Tooltip(
-                      message: 'Click here to clear the list of todos.',
-                      child: Text('Clear todos'),
-                    ),
-                  ),
-                ),
-        
+                buildClearTodosButton(),
                 //Text to display the number of todos
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text('Number of todos: ${todos.length}'),
-                ),
+                buildCounterText(todos.length),
               ],
             ),
            
@@ -126,25 +139,22 @@ class _TodoAppState extends State<TodoApp> {
                 itemCount: todos.length,
                 itemBuilder: (context, index) {
                   //Each todo is displayed as a ListTile
-                  return ListTile(
-                    title: Text(todos[index]['title']),
-                    
-                    //Checkbox to mark the todo as done
-                    leading: Checkbox(
-                      value: todos[index]['isChecked'], 
-                      onChanged: (bool? value) {
-                        setState(() {
-                          // update the value of checkbox
-                          todos[index]['isChecked'] = value!;
-        
-                        });
-                      },
-                    ),
-                   
-                    //Delete button to remove the todo
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () => removeTodo(index),
+                  return Card( // Wrap ListTile with a Card
+                    color: Colors.grey[200], // Set the color of the card
+                    child: ListTile(
+                      title: Text(todos[index]['title']),
+                      leading: Checkbox(
+                        value: todos[index]['isChecked'], 
+                        onChanged: (bool? value) {
+                          setState(() {
+                            todos[index]['isChecked'] = value!;
+                          });
+                        },
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () => removeTodo(index),
+                      ),
                     ),
                   );
                 },
