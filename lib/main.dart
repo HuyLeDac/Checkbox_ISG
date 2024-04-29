@@ -1,3 +1,5 @@
+import 'dart:js_util';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -22,7 +24,7 @@ class MainApp extends StatelessWidget {
 
 //This class should create a stateful widget that builds the todo app.
 class TodoApp extends StatefulWidget {
-  const TodoApp({Key? key}) : super(key: key);
+  const TodoApp({super.key});
 
   //State class is created to maintain the state of the app
   @override
@@ -38,12 +40,12 @@ class _TodoAppState extends State<TodoApp> {
 
   //Add a new todo to the list
   //Clear the text field after adding the todo
-  void addTodo() {
-    setState(() {
-      todos.add({'title': controller.text, 'isChecked': false});
-      controller.clear();
-    });
-  }
+  void addTodo(String value) {
+  setState(() {
+    todos.add({'title': value, 'isChecked': false});
+    controller.clear();
+  });
+}
 
   //Remove a todo from the list
   void removeTodo(int index) {
@@ -63,57 +65,93 @@ class _TodoAppState extends State<TodoApp> {
       ),
 
       //Body of the app
-      body: Column(
-        children: [
-
-          //Text field to enter a new todo
-          TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              hintText: 'Enter a new ISG todo...',
+      body: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          children: <Widget>[
+        
+            //Text field to enter a new todo
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: 'Enter a new ISG todo...',
+              ),
+              onSubmitted: (value) => addTodo(controller.text),
             ),
-          ),
-
-          //Button to add a new todo
-          ElevatedButton(
-            //When the button is pressed, addTodo function is called
-            onPressed: addTodo,
-            child: const Text('Add Todo'),
-          ),
-
-          //List of todos
-          //Expanded is used to make the ListView take up the remaining space
-          Expanded(
-            //ListView is used to display the list of todos
-            child: ListView.builder(
-              itemCount: todos.length,
-              itemBuilder: (context, index) {
-                //Each todo is displayed as a ListTile
-                return ListTile(
-                  title: Text(todos[index]['title']),
-                  
-                  //Checkbox to mark the todo as done
-                  leading: Checkbox(
-                    value: todos[index]['isChecked'], 
-                    onChanged: (bool? value) {
+        
+            //Row to add a new todo and clear the list of todos
+            Row(
+              //Button to add a new todo
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    // When the button is pressed, addTodo function is called
+                    onPressed: () => addTodo(controller.text),
+                    child: const Tooltip(
+                      message: 'Write down your todo and click here to add it to the list.',
+                      child: Text('Add todo'),
+                    ),
+                  ),
+                ),
+        
+                //Button to clear the list of todos
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    onPressed: () {
                       setState(() {
-                        // update the value of checkbox
-                        todos[index]['isChecked'] = value!;
-
+                        todos.clear();
                       });
                     },
+                    child: const Tooltip(
+                      message: 'Click here to clear the list of todos.',
+                      child: Text('Clear todos'),
+                    ),
                   ),
-                 
-                  //Delete button to remove the todo
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () => removeTodo(index),
-                  ),
-                );
-              },
+                ),
+        
+                //Text to display the number of todos
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Number of todos: ${todos.length}'),
+                ),
+              ],
             ),
-          ),
-        ],
+           
+            //Expanded is used to make the ListView take up the remaining space
+            Expanded(
+              //ListView is used to display the list of todos
+              child: ListView.builder(
+                itemCount: todos.length,
+                itemBuilder: (context, index) {
+                  //Each todo is displayed as a ListTile
+                  return ListTile(
+                    title: Text(todos[index]['title']),
+                    
+                    //Checkbox to mark the todo as done
+                    leading: Checkbox(
+                      value: todos[index]['isChecked'], 
+                      onChanged: (bool? value) {
+                        setState(() {
+                          // update the value of checkbox
+                          todos[index]['isChecked'] = value!;
+        
+                        });
+                      },
+                    ),
+                   
+                    //Delete button to remove the todo
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => removeTodo(index),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
