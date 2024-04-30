@@ -1,6 +1,7 @@
-import 'dart:js_util';
-
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 void main() {
   runApp(const MainApp());
@@ -34,24 +35,33 @@ class TodoApp extends StatefulWidget {
 // '_' is used to make the class private
 class _TodoAppState extends State<TodoApp> {
   //List of todos with state if they are checked or not
-  final List<Map<String, dynamic>> todos = [];
+  List<Map<String, dynamic>> todos = [];
   //Text controller to get the text from the text field
   final TextEditingController controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Call your loadTodos function here
+    loadTodos();
+  }
 
   //Add a new todo to the list
   //Clear the text field after adding the todo
   void addTodo(String value) {
-  setState(() {
-    todos.add({'title': value, 'isChecked': false});
-    controller.clear();
-  });
-}
+    setState(() {
+      todos.add({'title': value, 'isChecked': false});
+      controller.clear();
+      saveTodos();
+    });
+  }
 
   //Remove a todo from the list
   void removeTodo(int index) {
     setState(() {
       //Remove the todo at the given index
       todos.removeAt(index);
+      saveTodos();
     });
   }
 
@@ -77,6 +87,7 @@ class _TodoAppState extends State<TodoApp> {
         onPressed: () {
           setState(() {
             todos.clear();
+            saveTodos();
           });
         },
         child: const Tooltip(
@@ -94,7 +105,24 @@ class _TodoAppState extends State<TodoApp> {
       child: Text('Number of todos: $length'),
     );
   }
-  
+
+  //Save function to save the todos to the shared preferences (Not working on web)
+  Future<void> saveTodos() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('todos', jsonEncode(todos));
+  }
+
+  //Load function to load the todos from the shared preferences (Not working on web)
+  Future<void> loadTodos() async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = prefs.getString('todos');
+    if (data != null) {
+      //setState is used to update the state of the app
+      setState(() {
+        todos = List<Map<String, dynamic>>.from(jsonDecode(data));
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +130,13 @@ class _TodoAppState extends State<TodoApp> {
       //App bar with the title
       appBar: AppBar(
         title: const Text('ISG Todo App'),
-        backgroundColor: Color.fromRGBO(0, 157, 224, 1),
+        backgroundColor:const Color.fromRGBO(0, 157, 224, 1),
+        actions: [
+          IconButton(
+            icon: Image.asset('assets/images/isglogo.png'),
+            onPressed: () => launchUrl(Uri.parse('https://www.isg-stuttgart.de/')),
+          ),
+        ],
       ),
 
       //Body of the app
@@ -120,7 +154,7 @@ class _TodoAppState extends State<TodoApp> {
               onSubmitted: (value) => addTodo(controller.text),
             ),
         
-            //Row to add a new todo and clear the list of todos
+            //Row to add a new todo, clear the list of todos and display the number of todos
             Row(
               children: [
                 //Button to add a new todo
